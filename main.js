@@ -38,8 +38,8 @@ function Choropleth(gson) {
 
   function getPercentage(props, attr) {
     var total = props['Jumlah Meteran'] + props['Jumlah Non-Meteran'] +
-      props['Jumlah Non-PLN'] + props['Jumlah Bukan Listrik'];
-    return ((props[attr]) / total) * 100;
+      props['Jumlah Non-PLN'] + props['Jumlah Bukan Listrik']+4;
+    return ((props[attr]+1) / total) * 100;
   }
 
   var pieColor = {
@@ -71,10 +71,12 @@ function Choropleth(gson) {
       var pieData = null;
       if (props) {
         pieData = [];
+        var numberOfFamily = 0;
         _.each(props, function(value, key) {
           if (key.indexOf('Jumlah') == -1) {
             detail += '<b>' + key + '</b>: ' + value + '<br/>';
           } else {
+            numberOfFamily += value;
             pieData.push({
               value: getPercentage(props, key),
               color: pieColor[key],
@@ -85,6 +87,9 @@ function Choropleth(gson) {
         detail += '<b>Aksesbilitas</b>: ' +
           (100 - getPercentage(props, 'Jumlah Bukan Listrik')).toFixed(2) +
           '%<br/>';
+        detail += '<b>Jumlah Rumah Tangga</b>: ' +
+          numberOfFamily +
+          '<br/>';
       } else {
         detail = 'Hover over a state';
       }
@@ -138,14 +143,16 @@ function Choropleth(gson) {
   this.infoControl = infoControl;
 
   function getColor(val) {
-    if (val == 100) {
-      return '#800026';
-    } else if (val >= 75) {
-      return '#E31A1C';
-    } else if (val >= 25) {
-      return '#FEB24C';
+    if (val >= 80) {
+      return '#2c7bb6';
+    } else if (val >= 60) {
+      return '#abd9e9';
+    } else if (val >= 40) {
+      return '#ffffbf';
+    } else if (val >= 20) {
+      return '#fdae61';
     }
-    return '#FFEDA0';
+    return '#d7191c';
   }
 
   this.geoJson = L.geoJson(gson, {
@@ -156,7 +163,7 @@ function Choropleth(gson) {
           ),
           weight: 2,
           opacity: 1,
-          color: 'white',
+          color: 'black',
           dashArray: '3',
           fillOpacity: 0.7
         };
@@ -179,13 +186,13 @@ function Choropleth(gson) {
       var card = L.DomUtil.create('div', 'card');
       var cardContent = L.DomUtil.create('div', 'card-content', card);
       var cardTitle = L.DomUtil.create('span', 'card-title', cardContent);
-      cardTitle.innerHTML = 'Legend';
+      cardTitle.innerHTML = 'Aksesbilitas Listrik ';
       var cardDescription = L.DomUtil.create('div', 'legend', cardContent);
       var cardDescriptionList = L.DomUtil.create('ul', undefined, cardDescription);
       cardDescriptionList.innerHTML = '';
-      var level = [0, 25, 75, 100];
+      var level = [0, 20, 40, 60, 80, 100];
 
-      for (var idx = 0; idx < level.length; ++idx) {
+      for (var idx = 0; idx < level.length - 1; ++idx) {
         cardDescriptionList.innerHTML +=
           '<li><span style="background:' + getColor(level[idx] + 1) + '"></span> ' +
           level[idx] + (level[idx + 1] ? '&ndash;' + level[idx + 1] : '+') + '% </li>';
