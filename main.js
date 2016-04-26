@@ -128,6 +128,15 @@ function Choropleth(gson) {
       },
       onEachFeature: function(feature, layer) {
         layer.on({
+          mousemove: function(feature) {
+            L.popup({
+              autoPan: false,
+              closeButton: false
+            }).setLatLng(feature.latlng)
+              .setContent(feature.target.feature.properties['Nama Kabupaten'])
+              .openOn(map);
+            // Materialize.toast(feature.target.feature.properties['Nama Kabupaten'], 500)
+          },
           mousedown: infoControl.onclick
         });
       }
@@ -157,3 +166,4 @@ function Choropleth(gson) {
 }
 
 (new Choropleth(data.gson)).main();
+$('#modal1').openModal();
