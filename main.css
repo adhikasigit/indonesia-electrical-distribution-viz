@@ -1,0 +1,41 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    margin: -64px 0 0 0;
+    padding: 64px 0 0 0;
+}
+
+main, #mapid {
+    height: 100%;
+}
+
+nav .nav-wrapper a.page-title {
+    font-size: 36px;
+}
+
+.side-nav {
+    padding: 15px 15px;
+}
+
+canvas {
+    height: auto;
+    width: 100%;
+}
+
+.legend div span {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+}
+
+#map-legend {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding-bottom: 15px;
+}

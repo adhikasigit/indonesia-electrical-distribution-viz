@@ -5,27 +5,37 @@
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css">
     <link rel="stylesheet" href="http://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css">
-    <title>Hello</title>
-    <style>
-        html, body, #mapid {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        canvas {
-            height: auto;
-            width: 100%;
-        }
-        .legend li span{
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            margin-right: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="main.css">
+    <title>Aksesibilitas Listrik</title>
 </head>
 <body>
-<div id="mapid"></div>
+<header>
+    <nav>
+        <div class="container">
+            <div class="nav-wrapper"><a class="page-title">Aksesibilitas Listrik</a></div>
+        </div>
+    </nav>
+    <div class="side-nav fixed right-aligned" style="width: 350px" id="sidebar">
+        <h4>Detail Kabupaten</h4>
+        <div id="description">
+        </div>
+        <div class="legend">
+            <div class="pie-legend">
+                <div><span style="background-color:#f4d00c"></span>Jumlah Meteran</div>
+                <div><span style="background-color:#e19f25"></span>Jumlah Non-Meteran</div>
+                <div><span style="background-color:#0093d1"></span>Jumlah Non-PLN</div>
+                <div><span style="background-color:#b83032"></span>Jumlah Bukan Listrik</div>
+            </div>
+        </div>
+        <div id="map-legend">
+            <div class="divider"></div>
+            <h4>Legend Aksesibilitas</h4>
+        </div>
+    </div>
+</header>
+<main>
+    <div id="mapid"></div>
+</main>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/async/1.5.2/async.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>

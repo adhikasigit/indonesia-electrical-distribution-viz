@@ -38,8 +38,8 @@ function Choropleth(gson) {
 
   function getPercentage(props, attr) {
     var total = props['Jumlah Meteran'] + props['Jumlah Non-Meteran'] +
-      props['Jumlah Non-PLN'] + props['Jumlah Bukan Listrik']+4;
-    return ((props[attr]+1) / total) * 100;
+      props['Jumlah Non-PLN'] + props['Jumlah Bukan Listrik'] + 4;
+    return ((props[attr] + 1) / total) * 100;
   }
 
   var pieColor = {
@@ -50,23 +50,10 @@ function Choropleth(gson) {
   };
 
   // Information
-  var infoControl = new (L.Control.extend({
-    options: {
-      position: 'topright'
-    },
-
-    onAdd: function(map) {
-      var card = L.DomUtil.create('div', 'card');
-      var cardContent = L.DomUtil.create('div', 'card-content', card);
-      var cardTitle = L.DomUtil.create('span', 'card-title', cardContent);
-      cardTitle.innerHTML = 'Detil Kabupaten';
-      var cardDescription = L.DomUtil.create('p', undefined, cardContent);
-      cardDescription.innerHTML = 'Hover over a state';
-      return card;
-    },
-
-    update: function(props) {
-      var container = this.getContainer().getElementsByTagName('p')[0];
+  var infoControl = {
+    onclick: function(props) {
+      props = props.target.feature.properties;
+      var container = document.getElementById('description');
       var detail = '';
       var pieData = null;
       if (props) {
@@ -98,49 +85,20 @@ function Choropleth(gson) {
         var pieCtx = L.DomUtil
           .create('canvas', undefined, container)
           .getContext('2d');
-        var pie = (new Chart(pieCtx)).Pie(pieData, {
+        (new Chart(pieCtx)).Pie(pieData, {
           //Boolean - Whether we animate the rotation of the Doughnut
           animateRotate: true,
 
           //Boolean - Whether we animate scaling the Doughnut from the centre
-          animateScale: true,
+          animateScale: false,
 
-          tooltipTemplate: '<%= value.toFixed(2) %> %',
+          tooltipTemplate: '<%= value.toFixed(0) %> %',
 
-          tooltipEvents: [],
-
-          showTooltips: true,
-          onAnimationProgress: function() {
-            this.showTooltip(this.segments, true);
-          },
-
-          onAnimationComplete: function() {
-            this.showTooltip(this.segments, true);
-          }
+          showTooltips: true
         });
-        L.DomUtil.create('div', 'legend', container)
-          .innerHTML = pie.generateLegend();
       }
-    },
-
-    // listener functions
-    highlight: function() {
-      var control = this;
-      return function(e) {
-        var layer = e.target;
-        control.update(layer.feature.properties);
-      };
-    },
-
-    reset: function() {
-      var control = this;
-      return function() {
-        control.update();
-      };
     }
-  }))();
-
-  this.infoControl = infoControl;
+  };
 
   function getColor(val) {
     if (val >= 80) {
@@ -170,40 +128,30 @@ function Choropleth(gson) {
       },
       onEachFeature: function(feature, layer) {
         layer.on({
-          mouseover: infoControl.highlight(),
-          mouseout: infoControl.reset()
+          mousedown: infoControl.onclick
         });
       }
     }
   );
 
-  this.legend = new (L.Control.extend({
-    options: {
-      position: 'bottomright'
-    },
+  this.legend = {
+    add: function() {
+      var container = document.getElementById('map-legend');
+      var legend = L.DomUtil.create('div', 'legend', container);
 
-    onAdd: function(map) {
-      var card = L.DomUtil.create('div', 'card');
-      var cardContent = L.DomUtil.create('div', 'card-content', card);
-      var cardTitle = L.DomUtil.create('span', 'card-title', cardContent);
-      cardTitle.innerHTML = 'Aksesbilitas Listrik ';
-      var cardDescription = L.DomUtil.create('div', 'legend', cardContent);
-      var cardDescriptionList = L.DomUtil.create('ul', undefined, cardDescription);
-      cardDescriptionList.innerHTML = '';
       var level = [0, 20, 40, 60, 80, 100];
-
       for (var idx = 0; idx < level.length - 1; ++idx) {
-        cardDescriptionList.innerHTML +=
-          '<li><span style="background:' + getColor(level[idx] + 1) + '"></span> ' +
-          level[idx] + (level[idx + 1] ? '&ndash;' + level[idx + 1] : '+') + '% </li>';
+        var elementLegend = L.DomUtil.create('div', undefined, legend);
+        var span = L.DomUtil.create('span', undefined, elementLegend);
+        span.style.background = getColor(level[idx] + 1);
+        elementLegend.innerHTML +=
+          level[idx] + '&ndash;' + level[idx + 1] + '%';
       }
-      return card;
     }
-  }))();
+  };
 
   this.main = function() {
-    map.addControl(this.infoControl);
-    map.addControl(this.legend);
+    this.legend.add();
     this.geoJson.addTo(map);
   };
 }
