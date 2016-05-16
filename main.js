@@ -101,16 +101,16 @@ function Choropleth(gson) {
   };
 
   function getColor(val) {
-    if (val >= 80) {
-      return '#2c7bb6';
-    } else if (val >= 60) {
-      return '#abd9e9';
-    } else if (val >= 40) {
-      return '#ffffbf';
-    } else if (val >= 20) {
-      return '#fdae61';
+    if (val >= 93.1575) {
+      return '#ffffb2';
+    } else if (val >= 83.7179) {
+      return '#fecc5c';
+    } else if (val >= 48.4835) {
+      return '#fd8d3c';
+    } else if (val >= 38.8235) {
+      return '#f03b20';
     }
-    return '#d7191c';
+    return '#bd0026';
   }
 
   this.geoJson = L.geoJson(gson, {
@@ -119,7 +119,7 @@ function Choropleth(gson) {
           fillColor: getColor(
             100 - getPercentage(feature.properties, 'Jumlah Bukan Listrik')
           ),
-          weight: 2,
+          weight: 1,
           opacity: 1,
           color: 'black',
           dashArray: '3',
@@ -148,7 +148,7 @@ function Choropleth(gson) {
       var container = document.getElementById('map-legend');
       var legend = L.DomUtil.create('div', 'legend', container);
 
-      var level = [0, 20, 40, 60, 80, 100];
+      var level = [0, 39, 48, 84, 93, 100];
       for (var idx = 0; idx < level.length - 1; ++idx) {
         var elementLegend = L.DomUtil.create('div', undefined, legend);
         var span = L.DomUtil.create('span', undefined, elementLegend);
