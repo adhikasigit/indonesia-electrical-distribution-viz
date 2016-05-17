@@ -1,13 +1,25 @@
 'use strict';
 
-var mapboxConfig = {
-  template: 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png' +
-  '?access_token={accessToken}',
-  id: 'opelhoward.pk7d9mn9',
-  accessToken: 'pk.' +
-  'eyJ1Ijoib3BlbGhvd2FyZCIsImEiOiJjaW1vaXFvNWIwMGZxdXlreWsydzNuMm42In0.' +
-  '1TgVGyHp_pxyWpq_NPnOpA'
+var dataLocation = {
+  'conf': 'conf.json',
+  'location': 'output.json',
+  'gson': 'sumberlistrik.json',
+  'overallData': 'overalldata.json'
 };
+
+var data = {
+  gpsLocation: {},
+  autocomplete: {}
+};
+async.map(['conf', 'location', 'gson', 'overallData'],
+  function(variable) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', dataLocation[variable], false);
+    xhr.send(null);
+    data[variable] = JSON.parse(xhr.responseText);
+  });
+
+var mapboxConfig = data.conf;
 
 var init = {
   pos: [-2.329499, 116.1167094],
@@ -21,19 +33,6 @@ L.tileLayer(mapboxConfig.template, {
   accessToken: mapboxConfig.accessToken
 }).addTo(map);
 
-var dataLocation = {
-  'location': 'output.json',
-  'gson': 'sumberlistrik.json'
-};
-
-var data = {};
-async.map(['location', 'gson'], function(variable) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', dataLocation[variable], false);
-  xhr.send(null);
-  data[variable] = JSON.parse(xhr.responseText);
-});
-
 function Choropleth(gson) {
 
   function getPercentage(props, attr) {
@@ -42,61 +41,51 @@ function Choropleth(gson) {
     return ((props[attr] + 1) / total) * 100;
   }
 
-  var pieColor = {
-    'Jumlah Meteran': '#f4d00c',
-    'Jumlah Non-Meteran': '#e19f25',
-    'Jumlah Non-PLN': '#0093d1',
-    'Jumlah Bukan Listrik': '#b83032'
-  };
-
   // Information
   var infoControl = {
-    onclick: function(props) {
-      props = props.target.feature.properties;
+    pieColor: {
+      'Jumlah Meteran': '#f4d00c',
+      'Jumlah Non-Meteran': '#e19f25',
+      'Jumlah Non-PLN': '#0093d1',
+      'Jumlah Bukan Listrik': '#b83032'
+    },
+
+    showRegencyData: function(props) {
       var container = document.getElementById('description');
       var detail = '';
-      var pieData = null;
-      if (props) {
-        pieData = [];
-        var numberOfFamily = 0;
-        _.each(props, function(value, key) {
-          if (key.indexOf('Jumlah') == -1) {
-            detail += '<b>' + key + '</b>: ' + value + '<br/>';
-          } else {
-            numberOfFamily += value;
-            pieData.push({
-              value: getPercentage(props, key),
-              color: pieColor[key],
-              label: key
-            });
-          }
-        });
-        detail += '<b>Aksesbilitas</b>: ' +
-          (100 - getPercentage(props, 'Jumlah Bukan Listrik')).toFixed(2) +
-          '%<br/>';
-        detail += '<b>Jumlah Rumah Tangga</b>: ' +
-          numberOfFamily +
-          '<br/>';
-      } else {
-        detail = 'Hover over a state';
-      }
+      var pieData = [];
+      var numberOfFamily = 0;
+      _.each(props, function(value, key) {
+        if (key.indexOf('Jumlah') == -1) {
+          detail += '<b>' + key + '</b>: ' + value + '<br/>';
+        } else {
+          numberOfFamily += value;
+          pieData.push({
+            value: getPercentage(props, key),
+            color: infoControl.pieColor[key],
+            label: key
+          });
+        }
+      });
+      detail += '<b>Aksesbilitas</b>: ' +
+        (100 - getPercentage(props, 'Jumlah Bukan Listrik')).toFixed(2) +
+        '%<br/>';
+      detail += '<b>Jumlah Rumah Tangga</b>: ' + numberOfFamily.toLocaleString('id') + '<br/>';
       container.innerHTML = detail;
-      if (pieData) {
-        var pieCtx = L.DomUtil
-          .create('canvas', undefined, container)
-          .getContext('2d');
-        (new Chart(pieCtx)).Pie(pieData, {
-          //Boolean - Whether we animate the rotation of the Doughnut
-          animateRotate: true,
+      var pieCtx = L.DomUtil
+        .create('canvas', undefined, container)
+        .getContext('2d');
+      (new Chart(pieCtx)).Pie(pieData, {
+        //Boolean - Whether we animate the rotation of the Doughnut
+        animateRotate: true,
 
-          //Boolean - Whether we animate scaling the Doughnut from the centre
-          animateScale: false,
+        //Boolean - Whether we animate scaling the Doughnut from the centre
+        animateScale: false,
 
-          tooltipTemplate: '<%= value.toFixed(0) %> %',
+        tooltipTemplate: '<%= value.toFixed(0) %> %',
 
-          showTooltips: true
-        });
-      }
+        showTooltips: true
+      });
     }
   };
 
@@ -129,16 +118,23 @@ function Choropleth(gson) {
       onEachFeature: function(feature, layer) {
         layer.on({
           mousemove: function(feature) {
+            var latlng = feature.latlng;
             L.popup({
               autoPan: false,
               closeButton: false
-            }).setLatLng(feature.latlng)
+            }).setLatLng(latlng)
               .setContent(feature.target.feature.properties['Nama Kabupaten'])
               .openOn(map);
-            // Materialize.toast(feature.target.feature.properties['Nama Kabupaten'], 500)
           },
-          mousedown: infoControl.onclick
+          click: function(props) {
+            var data = props.target.feature.properties;
+            if (data) {
+              infoControl.showRegencyData(data);
+            }
+          }
         });
+        data.gpsLocation[feature.properties['Nama Kabupaten']] = layer;
+        data.autocomplete[feature.properties['Nama Kabupaten']] = null;
       }
     }
   );
@@ -162,8 +158,21 @@ function Choropleth(gson) {
   this.main = function() {
     this.legend.add();
     this.geoJson.addTo(map);
+    infoControl.showRegencyData(data.overallData);
   };
 }
 
 (new Choropleth(data.gson)).main();
-$('#modal1').openModal();
+
+$('input.autocomplete').autocomplete({
+  data: data.autocomplete,
+  matchFn: function(name) {
+    var gpsLocation = data.gpsLocation;
+    if (gpsLocation.hasOwnProperty(name)) {
+      gpsLocation[name].fireEvent('click');
+      map.fitBounds(gpsLocation[name].getBounds());
+    }
+  }
+});
+
+$('#intro-modal').openModal();

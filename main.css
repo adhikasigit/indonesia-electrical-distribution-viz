@@ -13,12 +13,20 @@ main, #mapid {
     height: 100%;
 }
 
-nav .nav-wrapper a.page-title {
-    font-size: 36px;
+nav {
+    background-color: #2b8cbe;
 }
 
-.side-nav {
-    padding: 15px 15px;
+#sidebar {
+    right: 0;
+    position: absolute;
+    height: calc(100% - 64px);
+    z-index: 1;
+    background-color: white;
+    width: 300px;
+    padding: 0 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    overflow: auto;
 }
 
 canvas {
@@ -33,9 +41,36 @@ canvas {
     margin-right: 5px;
 }
 
-#map-legend {
-    position: fixed;
-    bottom: 0;
+#regency-detail {
     width: 100%;
-    padding-bottom: 15px;
+}
+
+#map-legend {
+    width: 100%;
+    border-top: dashed black thin;
+    margin: 10px 0;
+}
+
+/* Autocomplete */
+
+.autocomplete-content {
+    /*margin-left: 3rem;*/
+    width: 92%;
+    /*width: calc(100% - 3rem);*/
+}
+
+.autocomplete-content {
+    margin-top: -15px;
+    display: block;
+    opacity: 1;
+    position: static;
+}
+
+.autocomplete-content li .highlight{
+    color: #444;
+}
+
+.autocomplete-content {
+    position: absolute;
+    max-height: 200px;
 }

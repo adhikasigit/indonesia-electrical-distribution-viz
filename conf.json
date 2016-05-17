@@ -1,0 +1,5 @@
+{
+  "template": "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
+  "id": "opelhoward.pk7d9mn9",
+  "accessToken": "pk.eyJ1Ijoib3BlbGhvd2FyZCIsImEiOiJjaW1vaXFvNWIwMGZxdXlreWsydzNuMm42In0.1TgVGyHp_pxyWpq_NPnOpA"
+}
