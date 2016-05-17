@@ -199,4 +199,4 @@ $('input.autocomplete').autocomplete({
   }
 });
 
-// $('#intro-modal').openModal();
+$('#intro-modal').openModal();
