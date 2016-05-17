@@ -9,8 +9,34 @@ main {
     padding: 64px 0 0 0;
 }
 
-main, #mapid {
+main, #main, #mapid {
     height: 100%;
+}
+
+#main {
+    width: calc(100% - 300px);
+}
+
+#mapid {
+    width: 100%;
+}
+
+#hover-info {
+    position: absolute;
+    z-index: 1;
+    width: calc(100% - 300px);
+    text-align: center;
+    bottom: 0;
+}
+
+#hover-info span {
+    display: inline-block;
+    color: white;
+    padding: 6px 8px;
+    background: rgba(0,0,0,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    margin: 20px 0;
 }
 
 nav {

@@ -102,35 +102,55 @@ function Choropleth(gson) {
     return '#bd0026';
   }
 
+  var layerOutStyle = {
+    weight: 1,
+    opacity: 1,
+    color: 'black',
+    dashArray: '3',
+    fillOpacity: 0.7
+  };
+  var layerOverStyle = {
+    weight: 2,
+    color: 'black',
+    dashArray: ''
+  };
+
   this.geoJson = L.geoJson(gson, {
       style: function(feature) {
-        return {
-          fillColor: getColor(
-            100 - getPercentage(feature.properties, 'Jumlah Bukan Listrik')
-          ),
-          weight: 1,
-          opacity: 1,
-          color: 'black',
-          dashArray: '3',
-          fillOpacity: 0.7
-        };
+        var style = $.extend({}, layerOutStyle);
+        style.fillColor = getColor(
+          100 - getPercentage(feature.properties, 'Jumlah Bukan Listrik')
+        );
+        return style;
       },
       onEachFeature: function(feature, layer) {
         layer.on({
-          mousemove: function(feature) {
-            var latlng = feature.latlng;
-            L.popup({
-              autoPan: false,
-              closeButton: false
-            }).setLatLng(latlng)
-              .setContent(feature.target.feature.properties['Nama Kabupaten'])
-              .openOn(map);
+          mouseover: function(feature) {
+            var hoverInfo = $('#hover-info');
+            hoverInfo.find('span').show();
+            hoverInfo.find('span')
+              .text(feature.target.feature.properties['Nama Kabupaten']);
+
+            var layer = feature.target;
+
+            layer.setStyle(layerOverStyle);
+          },
+          // mousemove: function() {
+          //   var latlng = feature.latlng;
+          //   L.popup({
+          //     autoPan: false,
+          //     closeButton: false
+          //   }).setLatLng(latlng)
+          //     .setContent(feature.target.feature.properties['Nama Kabupaten'])
+          //     .openOn(map);
+          // },
+          mouseout: function(feature) {
+            $('#hover-info').find('span').hide();
+            layer.setStyle(layerOutStyle);
           },
           click: function(props) {
             var data = props.target.feature.properties;
-            if (data) {
-              infoControl.showRegencyData(data);
-            }
+            infoControl.showRegencyData(data);
           }
         });
         data.gpsLocation[feature.properties['Nama Kabupaten']] = layer;
@@ -159,6 +179,10 @@ function Choropleth(gson) {
     this.legend.add();
     this.geoJson.addTo(map);
     infoControl.showRegencyData(data.overallData);
+
+    map.on('click', function() {
+      infoControl.showRegencyData(data.overallData);
+    });
   };
 }
 
@@ -175,4 +199,4 @@ $('input.autocomplete').autocomplete({
   }
 });
 
-$('#intro-modal').openModal();
+// $('#intro-modal').openModal();
